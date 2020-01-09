@@ -1,5 +1,6 @@
 package com.miro.widgets.api;
 
+import com.miro.widgets.domain.constants.ConstantsUtils;
 import com.miro.widgets.domain.dto.request.WidgetRequest;
 import com.miro.widgets.domain.dto.response.WidgetResponse;
 import io.swagger.annotations.Api;
@@ -30,14 +31,14 @@ public interface WidgetControllerApi {
     @ApiOperation(notes = "Return a collection of Widgets sorted by z-index", value = "Return all Widgets", response = WidgetResponse.class)
     @ApiResponses({
             @ApiResponse(code = 200, message = "Widgets returned"),
-            @ApiResponse(code = 400, message = "Something is wrong with your request")})
+            @ApiResponse(code = 400, message = ConstantsUtils.HTTP_400_MESSAGE)})
     @GetMapping
     Flux<WidgetResponse> allWidgets();
 
     @ApiOperation(notes = "Return a Widget based on ID", value = "Return a Widget", response = WidgetResponse.class)
     @ApiResponses({
             @ApiResponse(code = 200, message = "Widget returned"),
-            @ApiResponse(code = 400, message = "Something is wrong with your request"),
+            @ApiResponse(code = 400, message = ConstantsUtils.HTTP_400_MESSAGE),
             @ApiResponse(code = 404, message = "Could not find the widget")})
     @GetMapping("{widgetId}")
     Mono<WidgetResponse> getWidget(@ApiParam(name= "widgetId", value = "Widget id in UUID format", required = true) @PathVariable UUID widgetId);
@@ -45,7 +46,7 @@ public interface WidgetControllerApi {
     @ApiOperation(notes = "Create a new widget based", value = "Create new Widget", response = WidgetResponse.class)
     @ApiResponses({
             @ApiResponse(code = 201, message = "Widgets created"),
-            @ApiResponse(code = 400, message = "Something is wrong with your request")})
+            @ApiResponse(code = 400, message = ConstantsUtils.HTTP_400_MESSAGE)})
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     Mono<WidgetResponse> createWidget(@Valid @RequestBody WidgetRequest body);
@@ -53,7 +54,7 @@ public interface WidgetControllerApi {
     @ApiOperation(notes = "Update the Widget based on ID", value = "Update a Widget", response = WidgetResponse.class)
     @ApiResponses({
             @ApiResponse(code = 200, message = "Widgets updated"),
-            @ApiResponse(code = 400, message = "Something is wrong with your request"),
+            @ApiResponse(code = 400, message = ConstantsUtils.HTTP_400_MESSAGE),
             @ApiResponse(code = 404, message = "Could not find the widget")})
     @PutMapping("/{widgetId}")
     Mono<WidgetResponse> updateWidget(@ApiParam(name= "widgetId", value = "Widget id in UUID format", required = true) @PathVariable UUID widgetId,
@@ -62,7 +63,7 @@ public interface WidgetControllerApi {
     @ApiOperation(notes = "Delete the Widget based on ID", value = "Delete a Widget", response = Object.class)
     @ApiResponses({
             @ApiResponse(code = 200, message = "Widgets deleted"),
-            @ApiResponse(code = 400, message = "Something is wrong with your request"),
+            @ApiResponse(code = 400, message = ConstantsUtils.HTTP_400_MESSAGE),
             @ApiResponse(code = 404, message = "Could not find the widget")})
     @DeleteMapping("{widgetId}")
     Mono<ResponseEntity<Void>> deleteWidget(@ApiParam(name= "widgetId", value = "Widget id in UUID format", required = true) @PathVariable UUID widgetId);

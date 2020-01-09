@@ -2,12 +2,16 @@ package com.miro.widgets.domain.dto.response;
 
 import com.miro.widgets.domain.dto.Coordinate;
 import com.miro.widgets.domain.dto.request.WidgetRequest;
-import lombok.Getter;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
 import java.util.UUID;
 
-@Getter
+@NoArgsConstructor
+@Data
+@EqualsAndHashCode
 public class WidgetResponse extends WidgetRequest {
 
     private UUID id;
