@@ -1,6 +1,10 @@
 package com.miro.widgets.api;
 
+import com.miro.widgets.domain.dto.request.WidgetRequest;
+import com.miro.widgets.domain.dto.response.WidgetResponse;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
@@ -11,27 +15,27 @@ import java.util.UUID;
 public class WidgetController implements WidgetControllerApi {
 
     @Override
-    public Mono<String> allWidgets() {
+    public Flux<WidgetResponse> allWidgets() {
         return null;
     }
 
     @Override
-    public Mono<String> getWidget(@NotBlank UUID widgetId) {
+    public Mono<WidgetResponse> getWidget(@NotBlank UUID widgetId) {
         return null;
     }
 
     @Override
-    public Mono<String> createWidgets(@Valid Object body) {
+    public Mono<WidgetResponse> createWidget(@Valid WidgetRequest body) {
         return null;
     }
 
     @Override
-    public Mono<String> createWidgets(@NotBlank UUID widgetId, @Valid Object body) {
+    public Mono<WidgetResponse> updateWidget(@NotBlank UUID widgetId, @Valid Object body) {
         return null;
     }
 
     @Override
-    public Mono<String> createWidgets(@NotBlank UUID widgetId) {
+    public Mono<ResponseEntity<Void>> deleteWidget(@NotBlank UUID widgetId) {
         return null;
     }
 }
