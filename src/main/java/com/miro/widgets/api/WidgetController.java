@@ -1,8 +1,9 @@
 package com.miro.widgets.api;
 
-import com.miro.widgets.domain.dto.Coordinate;
 import com.miro.widgets.domain.dto.request.WidgetRequest;
 import com.miro.widgets.domain.dto.response.WidgetResponse;
+import com.miro.widgets.domain.service.WidgetService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
@@ -10,8 +11,11 @@ import reactor.core.publisher.Mono;
 
 import java.util.UUID;
 
+@RequiredArgsConstructor
 @RestController
 public class WidgetController implements WidgetControllerApi {
+
+    private final WidgetService service;
 
     @Override
     public Flux<WidgetResponse> allWidgets() {
@@ -25,7 +29,7 @@ public class WidgetController implements WidgetControllerApi {
 
     @Override
     public Mono<WidgetResponse> createWidget(WidgetRequest body) {
-        return Mono.justOrEmpty(new WidgetResponse(UUID.randomUUID(), new Coordinate(), 0, 0, 0));
+        return service.createWidget(body);
     }
 
     @Override

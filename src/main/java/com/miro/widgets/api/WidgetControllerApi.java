@@ -25,7 +25,7 @@ import javax.validation.Valid;
 import java.util.UUID;
 
 @Api(tags = "Widgets")
-@RequestMapping("/widgets")
+@RequestMapping("/widget")
 public interface WidgetControllerApi {
 
     @ApiOperation(notes = "Return a collection of Widgets sorted by z-index", value = "Return all Widgets", response = WidgetResponse.class)
