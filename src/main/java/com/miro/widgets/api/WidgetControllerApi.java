@@ -21,7 +21,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
 import java.util.UUID;
 
 @Api(tags = "Widgets")
@@ -41,7 +40,7 @@ public interface WidgetControllerApi {
             @ApiResponse(code = 400, message = "Something is wrong with your request"),
             @ApiResponse(code = 404, message = "Could not find the widget")})
     @GetMapping("{widgetId}")
-    Mono<WidgetResponse> getWidget(@ApiParam(name= "widgetId", value = "Widget id in UUID format", required = true) @PathVariable @NotBlank UUID widgetId);
+    Mono<WidgetResponse> getWidget(@ApiParam(name= "widgetId", value = "Widget id in UUID format", required = true) @PathVariable UUID widgetId);
 
     @ApiOperation(notes = "Create a new widget based", value = "Create new Widget", response = WidgetResponse.class)
     @ApiResponses({
@@ -57,8 +56,8 @@ public interface WidgetControllerApi {
             @ApiResponse(code = 400, message = "Something is wrong with your request"),
             @ApiResponse(code = 404, message = "Could not find the widget")})
     @PutMapping("/{widgetId}")
-    Mono<WidgetResponse> updateWidget(@ApiParam(name= "widgetId", value = "Widget id in UUID format", required = true) @PathVariable @NotBlank UUID widgetId,
-                               @Valid @RequestBody Object body);
+    Mono<WidgetResponse> updateWidget(@ApiParam(name= "widgetId", value = "Widget id in UUID format", required = true) @PathVariable UUID widgetId,
+                               @Valid @RequestBody WidgetRequest body);
 
     @ApiOperation(notes = "Delete the Widget based on ID", value = "Delete a Widget", response = Object.class)
     @ApiResponses({
@@ -66,5 +65,5 @@ public interface WidgetControllerApi {
             @ApiResponse(code = 400, message = "Something is wrong with your request"),
             @ApiResponse(code = 404, message = "Could not find the widget")})
     @DeleteMapping("{widgetId}")
-    Mono<ResponseEntity<Void>> deleteWidget(@ApiParam(name= "widgetId", value = "Widget id in UUID format", required = true) @PathVariable @NotBlank UUID widgetId);
+    Mono<ResponseEntity<Void>> deleteWidget(@ApiParam(name= "widgetId", value = "Widget id in UUID format", required = true) @PathVariable UUID widgetId);
 }

@@ -12,8 +12,8 @@ public class WidgetResponse extends WidgetRequest {
 
     private UUID id;
 
-    public WidgetResponse(UUID id, @NonNull Coordinate coordinate, Integer zIndex, Integer width, Integer height) {
-        super(coordinate, zIndex, width, height);
+    public WidgetResponse(UUID id, @NonNull Coordinate coordinate, Integer zindex, Integer width, Integer height) {
+        super(coordinate, zindex, width, height);
         this.id = id;
     }
 }

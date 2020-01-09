@@ -1,23 +1,23 @@
 package com.miro.widgets.domain.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.miro.widgets.domain.dto.Coordinate;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 
-import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
-@NoArgsConstructor
 @AllArgsConstructor
-@Valid
+@NoArgsConstructor
 @Getter
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class WidgetRequest {
 
-    @NonNull
+    @NotNull
     private Coordinate coordinate;
 
-    private Integer zIndex;
+    private Integer zindex;
 
     private Integer width;
 
