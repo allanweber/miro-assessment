@@ -9,7 +9,6 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -40,7 +39,7 @@ public interface WidgetControllerApi {
             @ApiResponse(code = 200, message = "Widget returned"),
             @ApiResponse(code = 400, message = ConstantsUtils.HTTP_400_MESSAGE),
             @ApiResponse(code = 404, message = "Could not find the widget")})
-    @GetMapping("{widgetId}")
+    @GetMapping("/{widgetId}")
     Mono<WidgetResponse> getWidget(@ApiParam(name= "widgetId", value = "Widget id in UUID format", required = true) @PathVariable UUID widgetId);
 
     @ApiOperation(notes = "Create a new widget based", value = "Create new Widget", response = WidgetResponse.class)
@@ -60,11 +59,12 @@ public interface WidgetControllerApi {
     Mono<WidgetResponse> updateWidget(@ApiParam(name= "widgetId", value = "Widget id in UUID format", required = true) @PathVariable UUID widgetId,
                                @Valid @RequestBody WidgetRequest body);
 
-    @ApiOperation(notes = "Delete the Widget based on ID", value = "Delete a Widget", response = Object.class)
+    @ApiOperation(notes = "Delete the Widget based on ID", value = "Delete a Widget")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "Widgets deleted"),
+            @ApiResponse(code = 410, message = "Widgets deleted"),
             @ApiResponse(code = 400, message = ConstantsUtils.HTTP_400_MESSAGE),
             @ApiResponse(code = 404, message = "Could not find the widget")})
-    @DeleteMapping("{widgetId}")
-    Mono<ResponseEntity<Void>> deleteWidget(@ApiParam(name= "widgetId", value = "Widget id in UUID format", required = true) @PathVariable UUID widgetId);
+    @ResponseStatus(HttpStatus.GONE)
+    @DeleteMapping("/{widgetId}")
+    Mono<Void> deleteWidget(@ApiParam(name= "widgetId", value = "Widget id in UUID format", required = true) @PathVariable UUID widgetId);
 }

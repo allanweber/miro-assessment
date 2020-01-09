@@ -1,4 +1,4 @@
-package com.miro.widgets;
+package com.miro.widgets.helper;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;

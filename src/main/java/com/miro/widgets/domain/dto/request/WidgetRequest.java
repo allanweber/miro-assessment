@@ -19,7 +19,9 @@ public class WidgetRequest {
 
     private Integer zindex;
 
+    @NotNull
     private Integer width;
 
+    @NotNull
     private Integer height;
 }

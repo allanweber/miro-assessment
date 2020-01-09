@@ -4,7 +4,6 @@ import com.miro.widgets.domain.dto.request.WidgetRequest;
 import com.miro.widgets.domain.dto.response.WidgetResponse;
 import com.miro.widgets.domain.service.WidgetService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -19,12 +18,12 @@ public class WidgetController implements WidgetControllerApi {
 
     @Override
     public Flux<WidgetResponse> allWidgets() {
-        return null;
+        return service.getAll();
     }
 
     @Override
     public Mono<WidgetResponse> getWidget(UUID widgetId) {
-        return null;
+        return service.get(widgetId);
     }
 
     @Override
@@ -34,11 +33,11 @@ public class WidgetController implements WidgetControllerApi {
 
     @Override
     public Mono<WidgetResponse> updateWidget(UUID widgetId, WidgetRequest body) {
-        return null;
+        return service.updateWidget(widgetId, body);
     }
 
     @Override
-    public Mono<ResponseEntity<Void>> deleteWidget(UUID widgetId) {
-        return null;
+    public Mono<Void> deleteWidget(UUID widgetId) {
+        return service.deleteWidget(widgetId);
     }
 }

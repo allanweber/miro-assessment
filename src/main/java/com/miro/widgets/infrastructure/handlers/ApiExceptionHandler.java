@@ -2,6 +2,7 @@ package com.miro.widgets.infrastructure.handlers;
 
 import com.miro.widgets.domain.dto.response.ResponseErrorDto;
 import com.miro.widgets.domain.dto.response.ViolationDto;
+import com.miro.widgets.domain.exception.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,11 +24,18 @@ import java.util.List;
 public class ApiExceptionHandler {
     private static final String UNEXPECTED_ERROR_HAPPENED = "Unexpected Error happened";
     private static final String CONSTRAINT_MESSAGE = "Constraints violations found.";
+    private static final String NOTFOUND_MESSAGE = "Not found exception happened.";
 
     @ExceptionHandler(value = {HttpClientErrorException.class, RestClientException.class, WebClientException.class})
-    public ResponseEntity<String> handleClientException(Exception ex) {
+    public ResponseEntity<ResponseErrorDto> handleClientException(Exception ex) {
         log.error(UNEXPECTED_ERROR_HAPPENED, ex);
-        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(UNEXPECTED_ERROR_HAPPENED);
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(new ResponseErrorDto(ex.getMessage()));
+    }
+
+    @ExceptionHandler(value = {NotFoundException.class})
+    public ResponseEntity<ResponseErrorDto> handleNotFoundException(NotFoundException ex) {
+        log.error(NOTFOUND_MESSAGE, ex);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseErrorDto(ex.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
