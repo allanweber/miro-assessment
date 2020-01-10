@@ -11,6 +11,9 @@ import java.util.function.BiPredicate;
 public class UpdateWidgetConsistency {
 
     public static BiPredicate<Widget, Widget> satisfiedBy() {
-        return (alreadySaved, newRecord) -> Objects.nonNull(alreadySaved.getZindex()) && Objects.isNull(newRecord.getZindex());
+        return (alreadySaved, newRecord) ->
+
+                Objects.nonNull(alreadySaved) && Objects.nonNull(newRecord)
+                && Objects.nonNull(alreadySaved.getZindex()) && Objects.isNull(newRecord.getZindex());
     }
 }
