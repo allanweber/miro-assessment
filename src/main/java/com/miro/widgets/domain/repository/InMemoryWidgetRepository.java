@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Comparator;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -42,6 +43,11 @@ public class InMemoryWidgetRepository implements WidgetRepository {
     @Override
     public Mono<Void> delete(UUID id) {
         records.remove(id);
-        return  Mono.empty();
+        return Mono.empty();
+    }
+
+    @Override
+    public Mono<Integer> getMaxZIndex() {
+        return Mono.just(records.values().stream().max(Comparator.comparing(Widget::getZindex)).map(Widget::getZindex).orElse(-1));
     }
 }

@@ -6,6 +6,7 @@ import com.miro.widgets.domain.entity.Widget;
 import com.miro.widgets.domain.exception.NotFoundException;
 import com.miro.widgets.domain.mapper.WidgetMapper;
 import com.miro.widgets.domain.repository.WidgetRepository;
+import com.miro.widgets.domain.specification.NotIndexSpecified;
 import com.miro.widgets.domain.specification.UpdateWidgetConsistency;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -33,13 +34,6 @@ public class WidgetService {
                 .switchIfEmpty(Mono.error(new NotFoundException(id)));
     }
 
-    public Mono<WidgetResponse> createWidget(WidgetRequest widget) {
-        Widget entity = mapper.fromCreateRequest(widget);
-
-        return repository.create(entity)
-                .map(mapper::fromEntity);
-    }
-
     public Mono<WidgetResponse> updateWidget(UUID id, WidgetRequest widget) {
         Widget entity = mapper.fromUpdateRequest(id, widget);
 
@@ -54,6 +48,30 @@ public class WidgetService {
         return repository.get(id)
                 .switchIfEmpty(Mono.error(new NotFoundException(id)))
                 .then(repository.delete(id));
+    }
+
+    public Mono<WidgetResponse> createWidget(WidgetRequest widget) {
+        Widget entity = mapper.fromCreateRequest(widget);
+
+        return getCorrectIndex(entity).map(index -> {
+            entity.setZindex(index);
+            return entity;
+        }).flatMap(this::createAndMap);
+    }
+
+    private Mono<WidgetResponse> createAndMap(Widget entity) {
+        return repository.create(entity)
+                .map(mapper::fromEntity);
+    }
+
+    private Mono<Integer> getCorrectIndex(Widget entity) {
+        Mono<Integer> returnedMono;
+        if (NotIndexSpecified.satisfiedBy().test(entity)) {
+            returnedMono =  repository.getMaxZIndex().map(index -> index + 1);
+        } else {
+            returnedMono = Mono.justOrEmpty(entity.getZindex());
+        }
+        return returnedMono;
     }
 
     private Function<Widget, Widget> checkConsistency(Widget entity) {

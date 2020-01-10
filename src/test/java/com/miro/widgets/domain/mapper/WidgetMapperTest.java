@@ -5,19 +5,19 @@ import com.miro.widgets.domain.dto.request.WidgetRequest;
 import com.miro.widgets.domain.dto.response.WidgetResponse;
 import com.miro.widgets.domain.entity.Widget;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@SpringBootTest(classes = {com.miro.widgets.domain.mapper.WidgetMapperImpl.class})
+@ExtendWith(SpringExtension.class)
 class WidgetMapperTest {
 
-    @Autowired
-    private WidgetMapper mapper;
+    private WidgetMapper mapper = Mappers.getMapper(WidgetMapper.class);
 
     @Test
     public void Given_WidgetRequest_When_Creating_Then_MapToEntityWithNewId(){
