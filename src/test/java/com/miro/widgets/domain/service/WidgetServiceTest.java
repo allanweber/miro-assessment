@@ -72,7 +72,9 @@ class WidgetServiceTest {
         WidgetRequest request = WidgetRequest.builder().coordinate(coordinate).height(3).width(3).build();
         Widget createdEntity = Widget.builder().id(UUID.randomUUID()).coordinate(coordinate).height(3).width(3).zindex(3).build();
 
-        Mockito.when(repository.getMaxZIndex()).thenReturn(Mono.justOrEmpty(10));
+        Mockito.when(repository.filter(any())).thenReturn(Flux.empty());
+
+        Mockito.when(repository.getMaxIndex()).thenReturn(Mono.justOrEmpty(10));
 
         Mockito.when(repository.create(any())).thenReturn(Mono.justOrEmpty(createdEntity));
 
@@ -82,7 +84,7 @@ class WidgetServiceTest {
                 .expectNext(mapper.fromEntity(createdEntity))
                 .verifyComplete();
 
-        Mockito.verify(repository).getMaxZIndex();
+        Mockito.verify(repository).getMaxIndex();
     }
 
     @Test
@@ -91,7 +93,9 @@ class WidgetServiceTest {
         WidgetRequest request = WidgetRequest.builder().coordinate(coordinate).zindex(2).height(3).width(3).build();
         Widget createdEntity = Widget.builder().id(UUID.randomUUID()).coordinate(coordinate).height(3).width(3).zindex(3).build();
 
-        Mockito.when(repository.getMaxZIndex()).thenReturn(Mono.justOrEmpty(10));
+        Mockito.when(repository.filter(any())).thenReturn(Flux.empty());
+
+        Mockito.when(repository.getMaxIndex()).thenReturn(Mono.justOrEmpty(10));
 
         Mockito.when(repository.create(any())).thenReturn(Mono.justOrEmpty(createdEntity));
 
@@ -101,6 +105,6 @@ class WidgetServiceTest {
                 .expectNext(mapper.fromEntity(createdEntity))
                 .verifyComplete();
 
-        Mockito.verify(repository, Mockito.never()).getMaxZIndex();
+        Mockito.verify(repository, Mockito.never()).getMaxIndex();
     }
 }

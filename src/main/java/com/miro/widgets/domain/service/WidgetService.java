@@ -13,9 +13,14 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 @Service
 @RequiredArgsConstructor
@@ -53,10 +58,37 @@ public class WidgetService {
     public Mono<WidgetResponse> createWidget(WidgetRequest widget) {
         Widget entity = mapper.fromCreateRequest(widget);
 
+        if (Objects.nonNull(widget.getZindex())) {
+            pushWidgetsUpwards(widget.getZindex());
+        }
+
         return getCorrectIndex(entity).map(index -> {
             entity.setZindex(index);
             return entity;
         }).flatMap(this::createAndMap);
+    }
+
+    private void pushWidgetsUpwards(final Integer index) {
+
+        Integer currentIndex = index;
+        Optional<Widget> widget;
+        List<Widget> widgetsToUpdate = new ArrayList<>();
+        do {
+            widget = getByIndex(currentIndex);
+            if (widget.isPresent()) {
+                Widget record = widget.get();
+                record.setZindex(record.getZindex() + 1);
+                widgetsToUpdate.add(record);
+            }
+            currentIndex++;
+        } while (widget.isPresent());
+
+        widgetsToUpdate.forEach(record -> repository.update(record.getId(), record).block());
+    }
+
+    private Optional<Widget> getByIndex(Integer index) {
+        Predicate<Widget> forwardSpace = (widget) -> widget.getZindex().equals(index);
+        return repository.filter(forwardSpace).singleOrEmpty().blockOptional();
     }
 
     private Mono<WidgetResponse> createAndMap(Widget entity) {
@@ -67,7 +99,7 @@ public class WidgetService {
     private Mono<Integer> getCorrectIndex(Widget entity) {
         Mono<Integer> returnedMono;
         if (NotIndexSpecified.satisfiedBy().test(entity)) {
-            returnedMono =  repository.getMaxZIndex().map(index -> index + 1);
+            returnedMono = repository.getMaxIndex().map(index -> index + 1);
         } else {
             returnedMono = Mono.justOrEmpty(entity.getZindex());
         }

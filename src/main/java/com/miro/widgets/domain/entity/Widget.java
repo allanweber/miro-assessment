@@ -23,4 +23,12 @@ public class Widget {
     private Integer width;
 
     private Integer height;
+
+    public Widget(Widget widget) {
+        this.id = widget.id;
+        this.coordinate = widget.coordinate;
+        this.zindex = widget.zindex;
+        this.width = widget.width;
+        this.height = widget.height;
+    }
 }
