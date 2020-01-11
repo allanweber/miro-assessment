@@ -8,22 +8,35 @@ import com.miro.widgets.domain.mapper.WidgetMapper;
 import com.miro.widgets.domain.repository.WidgetRepository;
 import com.miro.widgets.domain.specification.NotIndexSpecified;
 import com.miro.widgets.domain.specification.UpdateWidgetConsistency;
+import com.miro.widgets.infrastructure.configuration.ExecutorConfiguration;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Comparator;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
+@EnableConfigurationProperties(ExecutorConfiguration.class)
 public class WidgetService {
 
     private final WidgetMapper mapper;
 
     private final WidgetRepository repository;
+
+    private final ExecutorConfiguration executorConfiguration;
 
     public Flux<WidgetResponse> getAll() {
         return repository.getAll().sort(Comparator.comparing(Widget::getZindex)).map(mapper::fromEntity);
@@ -53,10 +66,45 @@ public class WidgetService {
     public Mono<WidgetResponse> createWidget(WidgetRequest widget) {
         Widget entity = mapper.fromCreateRequest(widget);
 
-        return getCorrectIndex(entity).map(index -> {
-            entity.setZindex(index);
-            return entity;
-        }).flatMap(this::createAndMap);
+        if (Objects.nonNull(widget.getZindex())) {
+            pushWidgetsUpwards(widget.getZindex(), entity.getId());
+        }
+
+        return getCorrectIndex(entity)
+                .map(index -> {
+                    entity.setZindex(index);
+                    return entity;
+                }).flatMap(this::createAndMap);
+    }
+
+    @SuppressWarnings("PMD.AvoidCatchingGenericException")
+    private void pushWidgetsUpwards(final Integer currentIndex, final UUID currentId) {
+
+        ExecutorService executor = Executors.newFixedThreadPool(executorConfiguration.getThreads());
+        CompletableFuture.runAsync(() -> {
+            try {
+                Integer index = currentIndex;
+                UUID notThisId = currentId;
+                Optional<Widget> widget;
+                do {
+                    widget = getByIndex(index, notThisId);
+                    if (widget.isPresent()) {
+                        Widget record = widget.get();
+                        record.setZindex(record.getZindex() + 1);
+                        repository.update(record.getId(), record).subscribe();
+                        notThisId = record.getId();
+                    }
+                    index++;
+                } while (widget.isPresent());
+            } catch (Exception e) {
+                log.error("Error to push widgets upwards.", e);
+            }
+        }, executor).thenRun(() -> log.info("Push widgets upwards finished."));
+    }
+
+    private Optional<Widget> getByIndex(Integer index, UUID currentId) {
+        Predicate<Widget> forwardSpace = (widget) -> widget.getZindex().equals(index) && !widget.getId().equals(currentId);
+        return repository.filter(forwardSpace).singleOrEmpty().blockOptional();
     }
 
     private Mono<WidgetResponse> createAndMap(Widget entity) {
@@ -67,7 +115,7 @@ public class WidgetService {
     private Mono<Integer> getCorrectIndex(Widget entity) {
         Mono<Integer> returnedMono;
         if (NotIndexSpecified.satisfiedBy().test(entity)) {
-            returnedMono =  repository.getMaxZIndex().map(index -> index + 1);
+            returnedMono = repository.getMaxIndex().map(index -> index + 1);
         } else {
             returnedMono = Mono.justOrEmpty(entity.getZindex());
         }

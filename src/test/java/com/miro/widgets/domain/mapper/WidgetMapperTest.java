@@ -14,7 +14,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@ExtendWith(SpringExtension.class)
+@ExtendWith({SpringExtension.class})
 class WidgetMapperTest {
 
     private WidgetMapper mapper = Mappers.getMapper(WidgetMapper.class);

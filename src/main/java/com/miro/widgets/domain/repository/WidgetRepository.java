@@ -5,6 +5,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.UUID;
+import java.util.function.Predicate;
 
 public interface WidgetRepository {
 
@@ -18,5 +19,7 @@ public interface WidgetRepository {
 
     Mono<Void> delete(UUID id);
 
-    Mono<Integer> getMaxZIndex();
+    Mono<Integer> getMaxIndex();
+
+    Flux<Widget> filter(Predicate<Widget> predicate);
 }

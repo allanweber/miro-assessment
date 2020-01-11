@@ -6,6 +6,7 @@ import com.miro.widgets.domain.dto.response.WidgetResponse;
 import com.miro.widgets.domain.entity.Widget;
 import com.miro.widgets.domain.mapper.WidgetMapper;
 import com.miro.widgets.domain.repository.WidgetRepository;
+import com.miro.widgets.infrastructure.configuration.ExecutorConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,6 +34,9 @@ class WidgetServiceTest {
 
     @Mock
     private WidgetRepository repository;
+
+    @Mock
+    private ExecutorConfiguration executorConfiguration;
 
     @InjectMocks
     private WidgetService service;
@@ -72,7 +76,9 @@ class WidgetServiceTest {
         WidgetRequest request = WidgetRequest.builder().coordinate(coordinate).height(3).width(3).build();
         Widget createdEntity = Widget.builder().id(UUID.randomUUID()).coordinate(coordinate).height(3).width(3).zindex(3).build();
 
-        Mockito.when(repository.getMaxZIndex()).thenReturn(Mono.justOrEmpty(10));
+        Mockito.when(repository.filter(any())).thenReturn(Flux.empty());
+
+        Mockito.when(repository.getMaxIndex()).thenReturn(Mono.justOrEmpty(10));
 
         Mockito.when(repository.create(any())).thenReturn(Mono.justOrEmpty(createdEntity));
 
@@ -82,7 +88,7 @@ class WidgetServiceTest {
                 .expectNext(mapper.fromEntity(createdEntity))
                 .verifyComplete();
 
-        Mockito.verify(repository).getMaxZIndex();
+        Mockito.verify(repository).getMaxIndex();
     }
 
     @Test
@@ -91,9 +97,13 @@ class WidgetServiceTest {
         WidgetRequest request = WidgetRequest.builder().coordinate(coordinate).zindex(2).height(3).width(3).build();
         Widget createdEntity = Widget.builder().id(UUID.randomUUID()).coordinate(coordinate).height(3).width(3).zindex(3).build();
 
-        Mockito.when(repository.getMaxZIndex()).thenReturn(Mono.justOrEmpty(10));
+        Mockito.when(repository.filter(any())).thenReturn(Flux.empty());
+
+        Mockito.when(repository.getMaxIndex()).thenReturn(Mono.justOrEmpty(10));
 
         Mockito.when(repository.create(any())).thenReturn(Mono.justOrEmpty(createdEntity));
+
+        Mockito.when(executorConfiguration.getThreads()).thenReturn(1);
 
         Mono<WidgetResponse> widgetResponseMono = service.createWidget(request);
 
@@ -101,6 +111,6 @@ class WidgetServiceTest {
                 .expectNext(mapper.fromEntity(createdEntity))
                 .verifyComplete();
 
-        Mockito.verify(repository, Mockito.never()).getMaxZIndex();
+        Mockito.verify(repository, Mockito.never()).getMaxIndex();
     }
 }
