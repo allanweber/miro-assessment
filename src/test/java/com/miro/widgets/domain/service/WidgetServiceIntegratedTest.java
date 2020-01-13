@@ -1,16 +1,17 @@
 package com.miro.widgets.domain.service;
 
-import com.miro.widgets.domain.dto.request.WidgetRequest;
-import com.miro.widgets.domain.dto.response.WidgetResponse;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+
+import com.miro.widgets.domain.dto.request.WidgetRequest;
+import com.miro.widgets.domain.dto.response.WidgetResponse;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

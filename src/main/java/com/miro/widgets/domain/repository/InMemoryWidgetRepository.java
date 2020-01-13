@@ -1,11 +1,5 @@
 package com.miro.widgets.domain.repository;
 
-import com.miro.widgets.domain.entity.Widget;
-import org.springframework.context.annotation.Primary;
-import org.springframework.stereotype.Repository;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
 import java.util.Comparator;
 import java.util.Map;
 import java.util.Objects;
@@ -13,6 +7,14 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import com.miro.widgets.domain.entity.Widget;
+
+import org.springframework.context.annotation.Primary;
+import org.springframework.stereotype.Repository;
+
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Primary
 @Repository
