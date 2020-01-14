@@ -56,8 +56,8 @@ public class InMemoryWidgetRepository implements WidgetRepository {
     }
 
     @Override
-    public Mono<Void> delete(UUID id) {
-        return Mono.fromSupplier(() -> records.remove(id)).then();
+    public Mono<Widget> delete(UUID id) {
+        return Mono.justOrEmpty(records.remove(id));
     }
 
     @Override

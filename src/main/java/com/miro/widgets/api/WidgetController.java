@@ -4,10 +4,13 @@ import com.miro.widgets.domain.dto.request.WidgetRequest;
 import com.miro.widgets.domain.dto.response.WidgetResponse;
 import com.miro.widgets.domain.service.WidgetService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
+import java.net.URI;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -17,27 +20,37 @@ public class WidgetController implements WidgetControllerApi {
     private final WidgetService service;
 
     @Override
-    public Flux<WidgetResponse> allWidgets() {
-        return service.getAll();
+    public ResponseEntity<List<WidgetResponse>> allWidgets() {
+        return service.getAll().collectList().blockOptional()
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.ok(Collections.emptyList()));
     }
 
     @Override
-    public Mono<WidgetResponse> getWidget(UUID widgetId) {
-        return service.get(widgetId);
+    public ResponseEntity<WidgetResponse> getWidget(UUID widgetId) {
+        return service.get(widgetId).blockOptional()
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.badRequest().build());
     }
 
     @Override
-    public Mono<WidgetResponse> createWidget(WidgetRequest body) {
-        return service.createWidget(body);
+    public ResponseEntity<WidgetResponse> createWidget(WidgetRequest body) {
+        return service.createWidget(body).blockOptional()
+                .map(widget -> ResponseEntity.created(URI.create(String.format("/widget/%s", widget.getId()))).body(widget))
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @Override
-    public Mono<WidgetResponse> updateWidget(UUID widgetId, WidgetRequest body) {
-        return service.updateWidget(widgetId, body);
+    public ResponseEntity<WidgetResponse> updateWidget(UUID widgetId, WidgetRequest body) {
+        return service.updateWidget(widgetId, body).blockOptional()
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @Override
-    public Mono<Void> deleteWidget(UUID widgetId) {
-        return service.deleteWidget(widgetId);
+    public ResponseEntity<?> deleteWidget(UUID widgetId) {
+        return service.deleteWidget(widgetId).blockOptional()
+                .map(any -> ResponseEntity.status(HttpStatus.GONE).build())
+                .orElse(ResponseEntity.notFound().build());
     }
 }

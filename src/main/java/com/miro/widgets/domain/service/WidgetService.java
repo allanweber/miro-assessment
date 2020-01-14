@@ -57,10 +57,10 @@ public class WidgetService {
                 .map(mapper::fromEntity);
     }
 
-    public Mono<Void> deleteWidget(UUID id) {
-        return repository.get(id)
+    public Mono<WidgetResponse> deleteWidget(UUID id) {
+        return repository.delete(id)
                 .switchIfEmpty(Mono.error(new NotFoundException(id)))
-                .then(repository.delete(id));
+                .map(mapper::fromEntity);
     }
 
     public Mono<WidgetResponse> createWidget(WidgetRequest widget) {

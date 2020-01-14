@@ -17,7 +17,7 @@ public interface WidgetRepository {
 
     Mono<Widget> update(UUID id, Widget widget);
 
-    Mono<Void> delete(UUID id);
+    Mono<Widget> delete(UUID id);
 
     Mono<Integer> getMaxIndex();
 

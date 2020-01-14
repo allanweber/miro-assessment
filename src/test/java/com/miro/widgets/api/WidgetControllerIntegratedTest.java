@@ -3,10 +3,10 @@ package com.miro.widgets.api;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import com.miro.widgets.helper.ObjectMapperProvider;
 import com.miro.widgets.domain.dto.Coordinate;
 import com.miro.widgets.domain.dto.request.WidgetRequest;
 import com.miro.widgets.domain.dto.response.WidgetResponse;
+import com.miro.widgets.helper.ObjectMapperProvider;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,7 +15,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.List;
@@ -23,15 +22,16 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 class WidgetControllerIntegratedTest {
+
+    private static final String WIDGET_PATH = "/widget";
+    private static final String WIDGET_PATH_WITH_ID = String.format("%s/{widgetId}", WIDGET_PATH);
 
     private final ObjectWriter widgetRequestWriter = ObjectMapperProvider.get().writerFor(WidgetRequest.class);
     private final ObjectReader widgetsResponseReader = ObjectMapperProvider.get().readerFor(new TypeReference<List<WidgetResponse>>() {});
@@ -85,18 +85,19 @@ class WidgetControllerIntegratedTest {
         WidgetResponse createResponse = createWidget(widgetRequest);
 
         WidgetRequest widgetPutRequest = new WidgetRequest(new Coordinate(100, 200), 1000, 200, 300);
+        String body = widgetRequestWriter.writeValueAsString(widgetPutRequest);
 
-        MvcResult mvcResult = getMvcResultForPut(createResponse.getId(), widgetPutRequest);
-
-        mvcResult.getAsyncResult();
-
-        String jsonResponse = this.mockMvc.perform(asyncDispatch(mvcResult))
+        String jsonResponse =  mockMvc.perform(MockMvcRequestBuilders
+                .put(WIDGET_PATH_WITH_ID, createResponse.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
         WidgetResponse updateResponse = widgetResponseReader.readValue(jsonResponse);
 
         assertEquals(createResponse.getId(), updateResponse.getId());
+
         assertEquals(widgetPutRequest.getCoordinate(), updateResponse.getCoordinate());
         assertEquals(widgetPutRequest.getZindex(), updateResponse.getZindex());
         assertEquals(widgetPutRequest.getWidth(), updateResponse.getWidth());
@@ -113,26 +114,25 @@ class WidgetControllerIntegratedTest {
 
         WidgetRequest widgetRequest = new WidgetRequest(new Coordinate(1, 2), 1, 2, 3);
 
-        MvcResult mvcResult = getMvcResultForPut(UUID.randomUUID(), widgetRequest);
+        String body = widgetRequestWriter.writeValueAsString(widgetRequest);
 
-        mvcResult.getAsyncResult();
-
-        this.mockMvc.perform(asyncDispatch(mvcResult))
-                .andExpect(status().isNotFound());
+        mockMvc.perform(MockMvcRequestBuilders
+                .put(WIDGET_PATH_WITH_ID, UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body))
+                .andExpect(status().isNotFound())
+                .andReturn();
     }
 
     @SneakyThrows
     @Test
-    public void When_GettingWidget_Then_ReturnExpectedResponse(){
+    public void When_GettingWidget_Then_ReturnExpectedResponse() {
         WidgetRequest widgetRequest = new WidgetRequest(new Coordinate(1, 2), 1, 2, 3);
 
         WidgetResponse createResponse = createWidget(widgetRequest);
 
-        MvcResult mvcResult = getMvcResultForGet(createResponse.getId());
-
-        mvcResult.getAsyncResult();
-
-        String jsonResponse = this.mockMvc.perform(asyncDispatch(mvcResult))
+        String jsonResponse = mockMvc.perform(MockMvcRequestBuilders
+                .get(WIDGET_PATH_WITH_ID, createResponse.getId()))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
@@ -148,13 +148,10 @@ class WidgetControllerIntegratedTest {
     @SneakyThrows
     @Test
     public void When_GettingNonExistentWidget_Then_ReturnNotFound() {
-
-        MvcResult mvcResult = getMvcResultForGet(UUID.randomUUID());
-
-        mvcResult.getAsyncResult();
-
-        this.mockMvc.perform(asyncDispatch(mvcResult))
-                .andExpect(status().isNotFound());
+        mockMvc.perform(MockMvcRequestBuilders
+                .get(WIDGET_PATH_WITH_ID, UUID.randomUUID().toString()))
+                .andExpect(status().isNotFound())
+                .andReturn();
     }
 
     @SneakyThrows
@@ -163,24 +160,17 @@ class WidgetControllerIntegratedTest {
 
         WidgetResponse widget = WidgetResponse.builder().id(UUID.randomUUID()).build();
 
-        MvcResult mvcResult = getMvcResultForDelete(widget);
-
-        mvcResult.getAsyncResult();
-
-         this.mockMvc.perform(asyncDispatch(mvcResult))
-                .andExpect(status().isNotFound());
+        mockMvc.perform(MockMvcRequestBuilders
+                .delete(WIDGET_PATH_WITH_ID, widget.getId())
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andReturn();
     }
 
     @SneakyThrows
     private List<WidgetResponse> getAllWidgets() {
-        MvcResult mvcResult = this.mockMvc.perform(get("/widget")
+        String jsonResponse = this.mockMvc.perform(get(WIDGET_PATH)
                 .accept(MediaType.APPLICATION_JSON))
-                .andExpect(request().asyncStarted())
-                .andReturn();
-
-        mvcResult.getAsyncResult();
-
-        String jsonResponse = this.mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
@@ -190,51 +180,21 @@ class WidgetControllerIntegratedTest {
     private WidgetResponse createWidget(WidgetRequest widgetRequest) throws Exception {
         String body = widgetRequestWriter.writeValueAsString(widgetRequest);
 
-        return (WidgetResponse) mockMvc.perform(post("/widget")
+        String jsonResponse = mockMvc.perform(post(WIDGET_PATH)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(body))
                 .andExpect(status().isCreated())
-                .andReturn().getAsyncResult();
+                .andReturn().getResponse().getContentAsString();
+
+        return widgetResponseReader.readValue(jsonResponse);
     }
 
     @SneakyThrows
-    private void deleteWidget(WidgetResponse widget){
-        MvcResult mvcResult = getMvcResultForDelete(widget);
-
-        mvcResult.getAsyncResult();
-
-        this.mockMvc.perform(asyncDispatch(mvcResult))
-                .andExpect(status().isGone());
-    }
-
-    @SneakyThrows
-    private MvcResult getMvcResultForDelete(WidgetResponse widget) {
-        return mockMvc.perform(MockMvcRequestBuilders
-                    .delete("/widget/{widgetId}", widget.getId())
-                    .accept(MediaType.APPLICATION_JSON))
-                    .andExpect(request().asyncStarted())
-                    .andReturn();
-    }
-
-    @SneakyThrows
-    private MvcResult getMvcResultForPut(UUID id, WidgetRequest widgetPutRequest) {
-        String body = widgetRequestWriter.writeValueAsString(widgetPutRequest);
-
-        return mockMvc.perform(MockMvcRequestBuilders
-                .put("/widget/{widgetId}", id)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(body)
+    private void deleteWidget(WidgetResponse widget) {
+        mockMvc.perform(MockMvcRequestBuilders
+                .delete(WIDGET_PATH_WITH_ID, widget.getId())
                 .accept(MediaType.APPLICATION_JSON))
-                .andExpect(request().asyncStarted())
-                .andReturn();
-    }
-
-    @SneakyThrows
-    private MvcResult getMvcResultForGet(UUID id) {
-        return mockMvc.perform(MockMvcRequestBuilders
-                .get("/widget/{widgetId}", id)
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(request().asyncStarted())
+                .andExpect(status().isGone())
                 .andReturn();
     }
 }

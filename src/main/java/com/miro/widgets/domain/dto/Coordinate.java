@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-@EqualsAndHashCode
 @Builder
+@EqualsAndHashCode
 public class Coordinate {
     private Integer x;
     private Integer z;
