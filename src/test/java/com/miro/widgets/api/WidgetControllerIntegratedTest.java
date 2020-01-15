@@ -36,7 +36,8 @@ class WidgetControllerIntegratedTest {
     private static final String WIDGET_PATH_WITH_ID = String.format("%s/{widgetId}", WIDGET_PATH);
 
     private final ObjectWriter widgetRequestWriter = ObjectMapperProvider.get().writerFor(WidgetRequest.class);
-    private final ObjectReader widgetsResponseReader = ObjectMapperProvider.get().readerFor(new TypeReference<List<WidgetResponse>>() {});
+    private final ObjectReader widgetsResponseReader = ObjectMapperProvider.get().readerFor(new TypeReference<List<WidgetResponse>>() {
+    });
     private final ObjectReader widgetResponseReader = ObjectMapperProvider.get().readerFor(WidgetResponse.class);
 
     @Autowired
@@ -89,7 +90,7 @@ class WidgetControllerIntegratedTest {
         WidgetRequest widgetPutRequest = new WidgetRequest(new Coordinate(100, 200), 1000, 200, 300);
         String body = widgetRequestWriter.writeValueAsString(widgetPutRequest);
 
-        String jsonResponse =  mockMvc.perform(MockMvcRequestBuilders
+        String jsonResponse = mockMvc.perform(MockMvcRequestBuilders
                 .put(WIDGET_PATH_WITH_ID, createResponse.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(body))
@@ -169,6 +170,26 @@ class WidgetControllerIntegratedTest {
                 .andReturn();
     }
 
+    @Test
+    @SneakyThrows
+    public void When_GetAllPaginating_Then_ReturnCorrectPages() {
+
+        for (int i = 1; i <= 7; i++) {
+            WidgetRequest request = WidgetRequest.builder().height(i).width(i).zindex(i).coordinate(Coordinate.builder().x(i).z(i).build()).build();
+            createWidget(request);
+        }
+
+        List<WidgetResponse> widgetResponses = getPagedWidgets(1, 3);
+        assertEquals(3, widgetResponses.size());
+
+        widgetResponses = getPagedWidgets(2, 3);
+        assertEquals(3, widgetResponses.size());
+
+        widgetResponses = getPagedWidgets(3, 3);
+        assertEquals(1, widgetResponses.size());
+
+    }
+
     @SneakyThrows
     private List<WidgetResponse> getAllWidgets() {
         String jsonResponse = this.mockMvc.perform(get(WIDGET_PATH)
@@ -179,7 +200,20 @@ class WidgetControllerIntegratedTest {
         return widgetsResponseReader.readValue(jsonResponse);
     }
 
-    private WidgetResponse createWidget(WidgetRequest widgetRequest) throws Exception {
+    @SneakyThrows
+    private List<WidgetResponse> getPagedWidgets(Integer page, Integer count) {
+        String jsonResponse = this.mockMvc.perform(get(WIDGET_PATH)
+                .param("page", page.toString())
+                .param("count", count.toString())
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        return widgetsResponseReader.readValue(jsonResponse);
+    }
+
+    @SneakyThrows
+    private WidgetResponse createWidget(WidgetRequest widgetRequest) {
         String body = widgetRequestWriter.writeValueAsString(widgetRequest);
 
         String jsonResponse = mockMvc.perform(post(WIDGET_PATH)

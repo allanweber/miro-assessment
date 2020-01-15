@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.validation.Valid;
@@ -32,7 +33,8 @@ public interface WidgetControllerApi {
             @ApiResponse(code = 200, message = "Widgets returned"),
             @ApiResponse(code = 400, message = ConstantsUtils.HTTP_400_MESSAGE)})
     @GetMapping
-    ResponseEntity<List<WidgetResponse>> allWidgets();
+    ResponseEntity<List<WidgetResponse>> allWidgets(@RequestParam(name = "page", defaultValue = "1") Integer page,
+                                                    @RequestParam(name = "count", defaultValue = "10") Integer count);
 
     @ApiOperation(notes = "Return a Widget based on ID", value = "Return a Widget", response = WidgetResponse.class)
     @ApiResponses({

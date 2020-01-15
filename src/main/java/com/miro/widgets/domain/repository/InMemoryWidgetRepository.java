@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import com.miro.widgets.domain.dto.Pagination;
 import com.miro.widgets.domain.entity.Widget;
 
 import org.springframework.context.annotation.Primary;
@@ -23,8 +24,11 @@ public class InMemoryWidgetRepository implements WidgetRepository {
     private final Map<UUID, Widget> records = new ConcurrentHashMap<>();
 
     @Override
-    public Flux<Widget> getAll() {
-        return Flux.fromStream(records.values().stream().map(Widget::new).collect(Collectors.toList()).stream());
+    public Flux<Widget> getAll(Pagination pagination) {
+        return Flux.fromStream(records.values().stream()
+                .sorted(Comparator.comparing(Widget::getZindex))
+                .skip(pagination.skip()).limit(pagination.getCount())
+                .map(Widget::new).collect(Collectors.toList()).stream());
     }
 
     @Override

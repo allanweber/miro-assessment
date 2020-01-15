@@ -1,5 +1,6 @@
 package com.miro.widgets.api;
 
+import com.miro.widgets.domain.dto.Pagination;
 import com.miro.widgets.domain.dto.request.WidgetRequest;
 import com.miro.widgets.domain.dto.response.WidgetResponse;
 import com.miro.widgets.domain.service.WidgetService;
@@ -20,8 +21,10 @@ public class WidgetController implements WidgetControllerApi {
     private final WidgetService service;
 
     @Override
-    public ResponseEntity<List<WidgetResponse>> allWidgets() {
-        return service.getAll().collectList().blockOptional()
+    public ResponseEntity<List<WidgetResponse>> allWidgets(Integer page, Integer count) {
+
+        Pagination pagination = new Pagination(page, count);
+        return service.getAll(pagination).collectList().blockOptional()
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.ok(Collections.emptyList()));
     }

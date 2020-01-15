@@ -1,5 +1,7 @@
 package com.miro.widgets.domain.repository;
 
+import com.miro.widgets.domain.dto.Coordinate;
+import com.miro.widgets.domain.dto.Pagination;
 import com.miro.widgets.domain.entity.Widget;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
@@ -9,7 +11,6 @@ import reactor.test.StepVerifier;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Predicate;
 
@@ -60,7 +61,7 @@ class InMemoryWidgetRepositoryTest {
         Predicate<Widget> predicate = (widget) -> widget.getZindex() >= 10;
         Flux<Widget> filter = repository.filter(predicate);
 
-        assertEquals(3, Optional.ofNullable(filter.collectList().block()).orElse(Collections.emptyList()).size());
+        assertEquals(3, filter.collectList().blockOptional().orElse(Collections.emptyList()).size());
     }
 
     @Test
@@ -76,6 +77,60 @@ class InMemoryWidgetRepositoryTest {
         Predicate<Widget> predicate = (widget) -> widget.getZindex() >= 30;
         Flux<Widget> filter = repository.filter(predicate);
 
-        assertEquals(0, Optional.ofNullable(filter.collectList().block()).orElse(Collections.emptyList()).size());
+        assertEquals(0, filter.collectList().blockOptional().orElse(Collections.emptyList()).size());
+    }
+
+    @Test
+    public void Given_PaginationProcess_Then_ReturnCorrectAmountOfValuesForEachPage() {
+
+        InMemoryWidgetRepository repository = new InMemoryWidgetRepository();
+
+        Widget widget;
+        for (int i = 1; i <= 100; i++) {
+            widget = Widget.builder().id(UUID.randomUUID()).zindex(i).width(i).height(i).coordinate(Coordinate.builder().x(i).z(i).build()).build();
+            repository.create(widget).block();
+        }
+
+        Pagination pagination;
+        List<Widget> widgets;
+        for (int page = 1; page <= 10; page++) {
+
+            pagination = new Pagination(page, 10);
+            widgets = repository.getAll(pagination).collectList().blockOptional().orElse(Collections.emptyList());
+            assertEquals(10, widgets.size());
+
+            for (int item = 1; item <= 10; item++) {
+                assertEquals((pagination.skip() + item), widgets.get(item - 1).getZindex());
+            }
+        }
+    }
+
+    @Test
+    public void Given_PaginationProcess_WithNotRoundedNumberOfItems_Then_NotBreakIfAsForMoreThenExists() {
+
+        InMemoryWidgetRepository repository = new InMemoryWidgetRepository();
+
+        Widget widget;
+        for (int i = 1; i <= 15; i++) {
+            widget = Widget.builder().id(UUID.randomUUID()).zindex(i).width(i).height(i).coordinate(Coordinate.builder().x(i).z(i).build()).build();
+            repository.create(widget).block();
+        }
+
+        Pagination pagination;
+        List<Widget> widgets;
+        for (int page = 1; page <= 2; page++) {
+
+            pagination = new Pagination(page, 10);
+            widgets = repository.getAll(pagination).collectList().blockOptional().orElse(Collections.emptyList());
+
+            if(page == 1) {
+                assertEquals(10, widgets.size());
+            }
+
+            if(page == 2) {
+                assertEquals(5, widgets.size());
+            }
+        }
+
     }
 }

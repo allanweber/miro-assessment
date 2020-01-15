@@ -1,12 +1,14 @@
 package com.miro.widgets.domain.service;
 
 import com.miro.widgets.domain.dto.Coordinate;
+import com.miro.widgets.domain.dto.Pagination;
 import com.miro.widgets.domain.dto.request.WidgetRequest;
 import com.miro.widgets.domain.dto.response.WidgetResponse;
 import com.miro.widgets.domain.entity.Widget;
 import com.miro.widgets.domain.mapper.WidgetMapper;
 import com.miro.widgets.domain.repository.WidgetRepository;
 import com.miro.widgets.infrastructure.configuration.ExecutorConfiguration;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,6 +28,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(SpringExtension.class)
 class WidgetServiceTest {
@@ -44,30 +47,6 @@ class WidgetServiceTest {
     @BeforeEach
     private void setup() {
         ReflectionTestUtils.setField(service, "mapper", mapper);
-    }
-
-    @Test
-    void When_GettingAllWidgets_Then_ReturnResponseInTheRightOrder() {
-
-        Coordinate coordinate = Coordinate.builder().x(1).z(1).build();
-
-        List<Widget> widgets = Arrays.asList(
-                Widget.builder().id(UUID.randomUUID()).coordinate(coordinate).height(3).width(3).zindex(3).build(),
-                Widget.builder().id(UUID.randomUUID()).coordinate(coordinate).height(2).width(2).zindex(2).build(),
-                Widget.builder().id(UUID.randomUUID()).coordinate(coordinate).height(1).width(1).zindex(1).build()
-        );
-
-        List<WidgetResponse> expectedResponses = widgets.stream().map(mapper::fromEntity).collect(Collectors.toList());
-
-        Mockito.when(repository.getAll()).thenReturn(Flux.fromStream(widgets.stream()));
-
-        Flux<WidgetResponse> fluxAll = service.getAll();
-
-        StepVerifier.create(fluxAll)
-                .expectNext(expectedResponses.get(2))
-                .expectNext(expectedResponses.get(1))
-                .expectNext(expectedResponses.get(0))
-                .verifyComplete();
     }
 
     @Test
@@ -112,5 +91,10 @@ class WidgetServiceTest {
                 .verifyComplete();
 
         Mockito.verify(repository, Mockito.never()).getMaxIndex();
+    }
+
+    @Test
+    public void Given_NullPagination_Then_ThrowException() {
+        Assertions.assertThrows(NullPointerException.class, () -> service.getAll(null), "Pagination must be informed.");
     }
 }

@@ -1,5 +1,6 @@
 package com.miro.widgets.domain.repository;
 
+import com.miro.widgets.domain.dto.Pagination;
 import com.miro.widgets.domain.entity.Widget;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -9,7 +10,7 @@ import java.util.function.Predicate;
 
 public interface WidgetRepository {
 
-    Flux<Widget> getAll();
+    Flux<Widget> getAll(Pagination pagination);
 
     Mono<Widget> get(UUID id);
 

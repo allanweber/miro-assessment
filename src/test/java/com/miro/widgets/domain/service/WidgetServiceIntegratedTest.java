@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import com.miro.widgets.domain.dto.Pagination;
 import com.miro.widgets.domain.dto.request.WidgetRequest;
 import com.miro.widgets.domain.dto.response.WidgetResponse;
 
@@ -30,7 +31,7 @@ class WidgetServiceIntegratedTest {
     }
 
     private List<WidgetResponse> getAllWidgets() {
-        return service.getAll().collectList().blockOptional().orElse(Collections.emptyList());
+        return service.getAll(new Pagination(1, 500)).collectList().blockOptional().orElse(Collections.emptyList());
     }
 
     @Test

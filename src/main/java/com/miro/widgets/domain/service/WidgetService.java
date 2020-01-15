@@ -1,5 +1,6 @@
 package com.miro.widgets.domain.service;
 
+import com.miro.widgets.domain.dto.Pagination;
 import com.miro.widgets.domain.dto.request.WidgetRequest;
 import com.miro.widgets.domain.dto.response.WidgetResponse;
 import com.miro.widgets.domain.entity.Widget;
@@ -16,7 +17,6 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.Comparator;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -38,8 +38,9 @@ public class WidgetService {
 
     private final ExecutorConfiguration executorConfiguration;
 
-    public Flux<WidgetResponse> getAll() {
-        return repository.getAll().sort(Comparator.comparing(Widget::getZindex)).map(mapper::fromEntity);
+    public Flux<WidgetResponse> getAll(Pagination pagination) {
+        Objects.requireNonNull(pagination, "Pagination must be informed.");
+        return repository.getAll(pagination).map(mapper::fromEntity);
     }
 
     public Mono<WidgetResponse> get(UUID id) {
