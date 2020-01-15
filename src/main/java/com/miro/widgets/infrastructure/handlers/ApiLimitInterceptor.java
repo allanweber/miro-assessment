@@ -3,12 +3,12 @@ package com.miro.widgets.infrastructure.handlers;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.miro.widgets.domain.dto.response.ResponseErrorDto;
 import com.miro.widgets.domain.helper.ObjectMapperProvider;
-import com.miro.widgets.infrastructure.dto.ApiLimit;
 import com.miro.widgets.infrastructure.configuration.ApiLimitConfiguration;
 import com.miro.widgets.infrastructure.dto.RequestLimit;
-import com.miro.widgets.infrastructure.service.ApiLimitService;
-import com.miro.widgets.infrastructure.service.ApiLimiter;
+import com.miro.widgets.infrastructure.entity.ApiLimitSemaphore;
+import com.miro.widgets.infrastructure.repository.ApiLimitRepository;
 import com.miro.widgets.infrastructure.specification.HttpRequestSpecification;
+import com.miro.widgets.infrastructure.specification.LimitConfigurationEnabledSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
@@ -18,7 +18,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
@@ -27,15 +26,15 @@ public final class ApiLimitInterceptor extends HandlerInterceptorAdapter {
 
     private final ApiLimitConfiguration limitConfiguration;
 
-    private final ApiLimitService limitService;
+    private final ApiLimitRepository limitService;
 
     private final ObjectWriter responseErrorDtoWriter = ObjectMapperProvider.get().writerFor(ResponseErrorDto.class);
 
-    public static ApiLimitInterceptor create(ApiLimitConfiguration configuration, ApiLimitService limitService) {
+    public static ApiLimitInterceptor create(ApiLimitConfiguration configuration, ApiLimitRepository limitService) {
         return new ApiLimitInterceptor(configuration, limitService);
     }
 
-    private ApiLimitInterceptor(ApiLimitConfiguration limitConfiguration, ApiLimitService limitService) {
+    private ApiLimitInterceptor(ApiLimitConfiguration limitConfiguration, ApiLimitRepository limitService) {
         super();
         this.limitConfiguration = limitConfiguration;
         this.limitService = limitService;
@@ -43,32 +42,26 @@ public final class ApiLimitInterceptor extends HandlerInterceptorAdapter {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
-        if (!limitConfiguration.getEnabled()) {
+        if (LimitConfigurationEnabledSpecification.satisfiedBy().negate().test(limitConfiguration)) {
             return true;
         }
 
-        Optional<RequestLimit> configKey = getConfigKey(request);
-        if (configKey.isEmpty()) {
+        Optional<RequestLimit> key = getConfigKey(request);
+        if (key.isEmpty()) {
             return true;
         }
 
-        RequestLimit key = configKey.get();
-        ApiLimit apiLimit = limitConfiguration.getLimits().get(key.getLabel());
-        if(Objects.isNull(apiLimit)){
-            apiLimit = limitConfiguration.getGeneralLimit();
-            if(Objects.isNull(apiLimit)) {
-                log.warn("Is not possible to set limits for this request.");
-                return true;
-            }
+        Optional<ApiLimitSemaphore> limitSemaphore = limitService.getSemaphore(key.get());
+
+        if(limitSemaphore.isEmpty()){
+            return true;
         }
 
-        ApiLimiter rateLimiter = limitService.getOrCreateApiLimiter(key, apiLimit);
+        boolean allowRequest = limitSemaphore.get().tryAcquire();
 
-        boolean allowRequest = rateLimiter.tryAcquire();
-
-        String nextWindow = rateLimiter.getNextReset().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"));
-        response.addHeader("limit", rateLimiter.getMaxPermits().toString());
-        response.addHeader("available", rateLimiter.getRequestsAvailable().toString());
+        String nextWindow = limitSemaphore.get().getNextReset().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"));
+        response.addHeader("limit", limitSemaphore.get().getMaxPermits().toString());
+        response.addHeader("available", limitSemaphore.get().getRequestsAvailable().toString());
         response.addHeader("next-reset", nextWindow);
 
         if (!allowRequest) {

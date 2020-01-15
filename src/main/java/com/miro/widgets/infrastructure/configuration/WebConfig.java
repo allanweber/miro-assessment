@@ -1,7 +1,7 @@
 package com.miro.widgets.infrastructure.configuration;
 
 import com.miro.widgets.infrastructure.handlers.ApiLimitInterceptor;
-import com.miro.widgets.infrastructure.service.ApiLimitService;
+import com.miro.widgets.infrastructure.repository.ApiLimitRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -13,7 +13,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     private final ApiLimitConfiguration configuration;
 
-    private final ApiLimitService limitService;
+    private final ApiLimitRepository limitService;
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
