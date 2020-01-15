@@ -1,16 +1,39 @@
-# Getting Started
+# Widgets
 
-### Reference Documentation
-For further reference, please consider the following sections:
+## Run the app
 
-* [Official Apache Maven documentation](https://maven.apache.org/guides/index.html)
-* [Spring Boot Maven Plugin Reference Guide](https://docs.spring.io/spring-boot/docs/2.2.2.RELEASE/maven-plugin/)
-* [Spring Boot Actuator](https://docs.spring.io/spring-boot/docs/2.2.2.RELEASE/reference/htmlsingle/#production-ready)
-* [Spring Configuration Processor](https://docs.spring.io/spring-boot/docs/2.2.2.RELEASE/reference/htmlsingle/#configuration-metadata-annotation-processor)
-* [Spring Boot DevTools](https://docs.spring.io/spring-boot/docs/2.2.2.RELEASE/reference/htmlsingle/#using-boot-devtools)
+* _mvn spring-boot:run_    
 
-### Guides
-The following guides illustrate how to use some features concretely:
+**To Test the app**
 
-* [Building a RESTful Web Service with Spring Boot Actuator](https://spring.io/guides/gs/actuator-service/)
+* _mvn test_  
+
+**The application has swagger on http://localhost:8080/**
+
+**There is a postman collection called Miro.postman_collection.json with some requests**
+
+## Stack
+* Java 11
+* Webflux
+* Spring Boot
+* JUnit5
+* swagger + swagger-ui
+* Unit and Integrated tests
+* Actuator
+* Lombok
+* Map Struct
+* PMD
+
+## Structure
+### Api
+Controllers and their interfaces (to document swagger)
+
+### Domain
+Business rules related to widgets management
+
+### Infrastructure
+Concrete implementations, for example InMemoryRepository  
+All Spring configurations, handlers and etc.  
+All logic related to api limits
+
 

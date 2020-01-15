@@ -1,4 +1,4 @@
-package com.miro.widgets.domain.repository;
+package com.miro.widgets.infrastructure.repository;
 
 import java.util.Comparator;
 import java.util.Map;
@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import com.miro.widgets.domain.dto.Pagination;
 import com.miro.widgets.domain.entity.Widget;
 
+import com.miro.widgets.domain.repository.WidgetRepository;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
 

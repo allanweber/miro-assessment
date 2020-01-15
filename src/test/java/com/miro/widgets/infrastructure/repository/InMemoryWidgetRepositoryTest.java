@@ -1,4 +1,4 @@
-package com.miro.widgets.domain.repository;
+package com.miro.widgets.infrastructure.repository;
 
 import com.miro.widgets.domain.dto.Coordinate;
 import com.miro.widgets.domain.dto.Pagination;

@@ -1,7 +1,6 @@
 package com.miro.widgets.domain.service;
 
 import com.miro.widgets.domain.dto.Coordinate;
-import com.miro.widgets.domain.dto.Pagination;
 import com.miro.widgets.domain.dto.request.WidgetRequest;
 import com.miro.widgets.domain.dto.response.WidgetResponse;
 import com.miro.widgets.domain.entity.Widget;
@@ -22,13 +21,9 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(SpringExtension.class)
 class WidgetServiceTest {
