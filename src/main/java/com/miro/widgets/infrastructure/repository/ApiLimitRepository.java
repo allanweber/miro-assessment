@@ -6,7 +6,7 @@ import com.miro.widgets.infrastructure.dto.RequestLimit;
 import com.miro.widgets.infrastructure.entity.ApiLimitSemaphore;
 import com.miro.widgets.infrastructure.specification.SemaphoreExpired;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Repository;
 
 import javax.validation.constraints.NotNull;
 import java.util.Map;
@@ -15,7 +15,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
-@Service
+@Repository
 @Slf4j
 public class ApiLimitRepository {
 

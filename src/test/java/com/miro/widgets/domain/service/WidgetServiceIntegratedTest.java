@@ -8,6 +8,7 @@ import java.util.UUID;
 import com.miro.widgets.domain.dto.request.WidgetRequest;
 import com.miro.widgets.domain.dto.response.WidgetResponse;
 
+import com.miro.widgets.domain.entity.Widget;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -104,5 +105,19 @@ class WidgetServiceIntegratedTest {
         assertEquals(14, allWidgets.get(5).getZindex());
         assertEquals(idPreviousIndex13, allWidgets.get(5).getId());
 
+    }
+
+    @Test
+    public void Given_RequestIndexNull_When_Update_Then_UseSavedIndex(){
+
+        WidgetRequest request = WidgetRequest.builder().zindex(5).build();
+
+        WidgetResponse widgetResponse = service.createWidget(request).blockOptional().orElse(WidgetResponse.builder().build());
+
+        WidgetRequest updateRequest = WidgetRequest.builder().build();
+
+        widgetResponse = service.updateWidget(widgetResponse.getId(), updateRequest).blockOptional().orElse(WidgetResponse.builder().build());
+
+        assertEquals(5, widgetResponse.getZindex());
     }
 }

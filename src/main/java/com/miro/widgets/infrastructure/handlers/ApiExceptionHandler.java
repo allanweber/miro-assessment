@@ -41,7 +41,7 @@ public class ApiExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    private ResponseErrorDto handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+    public ResponseErrorDto handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         log.error(CONSTRAINT_MESSAGE, e);
         List<ViolationDto> errors = new ArrayList<>();
         for (FieldError fieldError : e.getBindingResult().getFieldErrors()) {
