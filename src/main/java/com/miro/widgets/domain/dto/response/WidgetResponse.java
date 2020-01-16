@@ -25,4 +25,6 @@ public class WidgetResponse {
     private Integer width;
 
     private Integer height;
+
+    private String lastModification;
 }

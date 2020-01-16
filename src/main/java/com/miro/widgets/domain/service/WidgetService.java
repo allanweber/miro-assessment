@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -54,6 +55,7 @@ public class WidgetService {
         return repository.get(id)
                 .switchIfEmpty(Mono.error(new NotFoundException(id)))
                 .map(checkConsistency(entity))
+                .map(updateModification())
                 .then(repository.update(id, entity))
                 .map(mapper::fromEntity);
     }
@@ -73,9 +75,17 @@ public class WidgetService {
 
         return getCorrectIndex(entity)
                 .map(index -> {
+                    updateModification().apply(entity);
                     entity.setZindex(index);
                     return entity;
                 }).flatMap(this::createAndMap);
+    }
+
+    private Function<Widget, Widget> updateModification() {
+        return widget -> {
+            widget.setModification(LocalDateTime.now());
+            return widget;
+        };
     }
 
     @SuppressWarnings("PMD.AvoidCatchingGenericException")

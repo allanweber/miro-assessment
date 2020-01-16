@@ -9,6 +9,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -41,7 +43,7 @@ class WidgetMapperTest {
         WidgetRequest request = new WidgetRequest( coordinate, 1,2,3);
 
         UUID id = UUID.randomUUID();
-        Widget expectedEntity = new Widget(id, coordinate, 1,2,3);
+        Widget expectedEntity = new Widget(id, coordinate, 1,2,3, null);
 
         Widget widget = mapper.fromUpdateRequest(id, request);
 
@@ -51,11 +53,12 @@ class WidgetMapperTest {
     @Test
     public void Given_WidgetEntity_When_MappingFromEntity_Then_MapToResponse(){
 
+        LocalDateTime date = LocalDateTime.now();
         UUID id = UUID.randomUUID();
         Coordinate coordinate = new Coordinate(1, 2);
-        Widget entity = new Widget(id, coordinate, 1,2,3);
+        Widget entity = new Widget(id, coordinate, 1,2,3, date);
 
-        WidgetResponse expectedResponse = new WidgetResponse(id, coordinate,1,2,3);
+        WidgetResponse expectedResponse = new WidgetResponse(id, coordinate,1,2,3, date.format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")));
 
         WidgetResponse response = mapper.fromEntity(entity);
 
