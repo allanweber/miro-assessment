@@ -46,7 +46,7 @@ class WidgetServiceTest {
 
     @Test
     public void Given_WidgetWithIndexNull_Then_SetZIndexEqualToMaxPlusOne(){
-        Coordinate coordinate = Coordinate.builder().x(1).z(1).build();
+        Coordinate coordinate = Coordinate.builder().x(1).y(1).build();
         WidgetRequest request = WidgetRequest.builder().coordinate(coordinate).height(3).width(3).build();
         Widget createdEntity = Widget.builder().id(UUID.randomUUID()).coordinate(coordinate).height(3).width(3).zindex(3).build();
 
@@ -67,7 +67,7 @@ class WidgetServiceTest {
 
     @Test
     public void Given_WidgetWithIndex_Then_NeverExecuteGetMaxZIndex(){
-        Coordinate coordinate = Coordinate.builder().x(1).z(1).build();
+        Coordinate coordinate = Coordinate.builder().x(1).y(1).build();
         WidgetRequest request = WidgetRequest.builder().coordinate(coordinate).zindex(2).height(3).width(3).build();
         Widget createdEntity = Widget.builder().id(UUID.randomUUID()).coordinate(coordinate).height(3).width(3).zindex(3).build();
 

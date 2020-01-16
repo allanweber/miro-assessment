@@ -13,5 +13,5 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode
 public class Coordinate {
     private Integer x;
-    private Integer z;
+    private Integer y;
 }

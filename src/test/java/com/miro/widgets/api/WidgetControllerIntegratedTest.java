@@ -175,7 +175,7 @@ class WidgetControllerIntegratedTest {
     public void When_GetAllPaginating_Then_ReturnCorrectPages() {
 
         for (int i = 1; i <= 7; i++) {
-            WidgetRequest request = WidgetRequest.builder().height(i).width(i).zindex(i).coordinate(Coordinate.builder().x(i).z(i).build()).build();
+            WidgetRequest request = WidgetRequest.builder().height(i).width(i).zindex(i).coordinate(Coordinate.builder().x(i).y(i).build()).build();
             createWidget(request);
         }
 

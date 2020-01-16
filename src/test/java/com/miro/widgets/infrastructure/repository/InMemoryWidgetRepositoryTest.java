@@ -87,7 +87,7 @@ class InMemoryWidgetRepositoryTest {
 
         Widget widget;
         for (int i = 1; i <= 100; i++) {
-            widget = Widget.builder().id(UUID.randomUUID()).zindex(i).width(i).height(i).coordinate(Coordinate.builder().x(i).z(i).build()).build();
+            widget = Widget.builder().id(UUID.randomUUID()).zindex(i).width(i).height(i).coordinate(Coordinate.builder().x(i).y(i).build()).build();
             repository.create(widget).block();
         }
 
@@ -112,7 +112,7 @@ class InMemoryWidgetRepositoryTest {
 
         Widget widget;
         for (int i = 1; i <= 15; i++) {
-            widget = Widget.builder().id(UUID.randomUUID()).zindex(i).width(i).height(i).coordinate(Coordinate.builder().x(i).z(i).build()).build();
+            widget = Widget.builder().id(UUID.randomUUID()).zindex(i).width(i).height(i).coordinate(Coordinate.builder().x(i).y(i).build()).build();
             repository.create(widget).block();
         }
 

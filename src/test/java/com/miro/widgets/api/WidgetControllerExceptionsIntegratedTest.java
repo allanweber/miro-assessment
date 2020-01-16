@@ -53,7 +53,7 @@ public class WidgetControllerExceptionsIntegratedTest {
     @Test
     public void Given_RequestWithHeightNull_Then_ReturnBadRequestWithErrorResponse() throws Exception {
 
-        Coordinate coordinate = Coordinate.builder().z(1).x(1).build();
+        Coordinate coordinate = Coordinate.builder().y(1).x(1).build();
         WidgetRequest request = WidgetRequest.builder().coordinate(coordinate).width(1).build();
 
         String body = widgetRequestWriter.writeValueAsString(request);
@@ -70,7 +70,7 @@ public class WidgetControllerExceptionsIntegratedTest {
     @Test
     public void Given_RequestWithWidthNull_Then_ReturnBadRequestWithErrorResponse() throws Exception {
 
-        Coordinate coordinate = Coordinate.builder().z(1).x(1).build();
+        Coordinate coordinate = Coordinate.builder().y(1).x(1).build();
         WidgetRequest request = WidgetRequest.builder().coordinate(coordinate).height(1).build();
 
         String body = widgetRequestWriter.writeValueAsString(request);
