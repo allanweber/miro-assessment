@@ -28,7 +28,9 @@ pipeline {
             }
         }
         stage('Test Results') {
-            step([$class: 'JUnitResultArchiver', testResults: 'target/surefire-reports/TEST-*.xml'])
+            steps {
+                step([$class: 'JUnitResultArchiver', testResults: 'target/surefire-reports/TEST-*.xml'])
+            }
         }
         stage('Sonar') {
             when {
