@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.miro.widgets</groupId>
     <artifactId>miro-widgets</artifactId>
-    <version>1.0.0</version>
+    <version>0.0.1</version>
     <name>miro-widgets</name>
 
     <properties>
@@ -69,6 +69,7 @@
             <scope>test</scope>
             <exclusions>
                 <exclusion>
+
                     <groupId>org.junit.vintage</groupId>
                     <artifactId>junit-vintage-engine</artifactId>
                 </exclusion>
