@@ -1,7 +1,11 @@
-String committer, envType, version, image
-String prd = 'prd'
-String master = 'master'
 pipeline {
+    environment {
+        committer, envType, version, image
+        prd = 'prd'
+        master = 'master'
+        registryCredential = 'DockerHub'
+        dockerImage = ''
+    }
     agent any
 
     stages {
@@ -53,7 +57,7 @@ pipeline {
                 echo 'project version: ' + version
                 script {
                     if (envType == prd) image = "allanweber/miro-widgets:${version}"
-                    else image = "allanweber/miro-widgets-${envType}:${version}"
+                    else image = "allanweber/miro-widgets-${envType}:${version}-${env.BUILD_ID}"
                 }
                 echo 'image name: ' + image
             }
@@ -61,6 +65,18 @@ pipeline {
         stage('Build Image') {
             steps {
                 sh "docker build -t ${image} ."
+            }
+            script {
+                dockerImage = docker.build image
+            }
+        }
+        stage('Deploy Image') {
+            steps{
+                script {
+                    docker.withRegistry( '', registryCredential ) {
+                        dockerImage.push()
+                    }
+                }
             }
         }
     }
