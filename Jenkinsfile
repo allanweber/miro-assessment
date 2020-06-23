@@ -1,12 +1,37 @@
 String  committer, envType, version, image
 String imageBaseName = 'allanweber/miro-widgets'
+String prd = 'prd'
+String master = 'master'
 pipeline {
     agent any
 
     stages {
         stage ('Checking') {
             steps {
-                startPipeline()
+                echo 'Checking Branch Build: ' + env.BRANCH_NAME
+                checkout scm
+                script {
+                    committer = sh(returnStdout: true, script: 'git show -s --pretty=%an').trim()
+                }
+                echo 'committer -> ' + committer
+
+                script {
+                    version = sh(returnStdout: true,
+                    script: 'mvn help:evaluate -Dexpression=project.version -q -DforceStdout')
+                }
+                script {
+                    if (env.BRANCH_NAME == master) {
+                        envType = prd
+                        image = "${imageBaseName}:${version}"
+                    }
+                    else {
+                        envType = 'dev'
+                        image = "${imageBaseName}:${version}-${envType}-${env.BUILD_ID}"
+                    }
+                }
+                echo "Building for ${envType} environment"
+                echo 'project version: ' + version
+                echo 'image name: ' + image
             }
         }
         stage('Test') {
@@ -18,7 +43,7 @@ pipeline {
         stage('Sonar') {
             when {
                 not {
-                    branch 'master'
+                    branch master
                 }
             }
             steps {
@@ -49,15 +74,13 @@ pipeline {
         }
         stage('Tag Latest') {
             when {
-                branch 'master'
+                branch master
             }
             steps {
-                script {
-                    String latestImage = "${imageBaseName}:latest"
-                    sh "docker tag ${image} ${latestImage}"
-                    pushImage(latestImage)
-                    removeImage(latestImage)
-                }
+                latestImage = "${imageBaseName}:latest"
+                sh "docker tag ${image} ${latestImage}"
+                pushImage(latestImage)
+                removeImage(latestImage)
                 // sh "docker tag ${image} ${imageBaseName}:latest"
                 // sh "docker push ${imageBaseName}:latest"
                 // sh "docker rmi ${imageBaseName}:latest -f"
@@ -79,32 +102,4 @@ def pushImage(imageName) {
 
 def removeImage(imageName) {
     sh "docker rmi ${imageName}"
-}
-
-def startPipeline() {
-    echo 'Checking Branch Build: ' + env.BRANCH_NAME
-    checkout scm
-    script {
-        committer = sh(returnStdout: true, script: 'git show -s --pretty=%an').trim()
-    }
-    echo 'committer -> ' + committer
-
-    script {
-        version = sh(returnStdout: true,
-        script: 'mvn help:evaluate -Dexpression=project.version -q -DforceStdout')
-    }
-    script {
-        if (env.BRANCH_NAME == 'master') {
-            envType = 'prd'
-            image = "${imageBaseName}:${version}"
-        }
-        else {
-            envType = 'dev'
-            image = "${imageBaseName}:${version}-${envType}-${env.BUILD_ID}"
-        }
-    }
-    echo "Building for ${envType} environment"
-    echo 'project version: ' + version
-    echo 'image name: ' + image
-
 }
