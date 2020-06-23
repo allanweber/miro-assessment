@@ -1,23 +1,12 @@
 String  committer, envType, version, image
+String imageBaseName = 'allanweber/miro-widgets'
 String prd = 'prd'
 String master = 'master'
-String registryCredential = 'DockerHub'
-def dockerImage = ''
-
 pipeline {
     agent any
 
     stages {
-        stage ('Evaluating Environment') {
-            steps {
-                script {
-                    if (env.BRANCH_NAME == master) envType = prd
-                    else  envType = 'dev'
-                }
-                echo "Building for ${envType} environment"
-            }
-        }
-        stage('Checking') {
+        stage ('Checking') {
             steps {
                 echo 'Checking Branch Build: ' + env.BRANCH_NAME
                 checkout scm
@@ -25,15 +14,29 @@ pipeline {
                     committer = sh(returnStdout: true, script: 'git show -s --pretty=%an').trim()
                 }
                 echo 'committer -> ' + committer
+
+                script {
+                    version = sh(returnStdout: true,
+                    script: 'mvn help:evaluate -Dexpression=project.version -q -DforceStdout')
+                }
+                script {
+                    if (env.BRANCH_NAME == master) {
+                        envType = prd
+                        image = "${imageBaseName}:${version}"
+                    }
+                    else {
+                        envType = 'dev'
+                        image = "${imageBaseName}:${version}-${envType}-${env.BUILD_ID}"
+                    }
+                }
+                echo "Building for ${envType} environment"
+                echo 'project version: ' + version
+                echo 'image name: ' + image
             }
         }
         stage('Test') {
             steps {
                 sh 'mvn clean verify'
-            }
-        }
-        stage('Test Results') {
-            steps {
                 step([$class: 'JUnitResultArchiver', testResults: 'target/surefire-reports/TEST-*.xml'])
             }
         }
@@ -47,35 +50,52 @@ pipeline {
                 echo 'run sonarQube in future'
             }
         }
-        stage('Fomat Image Name') {
-            steps {
-                script {
-                    version = sh(returnStdout: true,
-                    script: 'mvn help:evaluate -Dexpression=project.version -q -DforceStdout')
-                }
-                echo 'project version: ' + version
-                script {
-                    if (envType == prd) image = "allanweber/miro-widgets:${version}"
-                    else image = "allanweber/miro-widgets-${envType}:${version}-${env.BUILD_ID}"
-                }
-                echo 'image name: ' + image
-            }
-        }
         stage('Build Image') {
             steps {
                 script {
-                    dockerImage = docker.build image
+                    sh "docker build --build-arg ENV_ARG=${envType} -t ${image} ."
                 }
             }
         }
-        stage('Deploy Image') {
+        stage('Docker Login') {
             steps {
                 script {
-                    docker.withRegistry( '', registryCredential ) {
-                        dockerImage.push()
+                    echo "${env.DOCKER_TOKEN} | docker login -u ${env.DOCKER_USER} --password-stdin"
+                }
+            }
+        }
+        stage('Push Images') {
+            parallel {
+                stage('Push Current Image') {
+                    steps {
+                        script {
+                            pushImage(image)
+                            removeImage(image)
+                        }
+                    }
+                }
+                stage ('Push Latest Image') {
+                    when {
+                        branch master
+                    }
+                    steps {
+                        script {
+                            String latestImage = "${imageBaseName}:latest"
+                            sh "docker tag ${image} ${latestImage}"
+                            pushImage(latestImage)
+                            removeImage(latestImage)
+                        }
                     }
                 }
             }
         }
     }
+}
+
+def pushImage(imageName) {
+    sh "docker push ${imageName}"
+}
+
+def removeImage(imageName) {
+    sh "docker rmi ${imageName}"
 }
