@@ -8,30 +8,7 @@ pipeline {
     stages {
         stage ('Checking') {
             steps {
-                echo 'Checking Branch Build: ' + env.BRANCH_NAME
-                checkout scm
-                script {
-                    committer = sh(returnStdout: true, script: 'git show -s --pretty=%an').trim()
-                }
-                echo 'committer -> ' + committer
-
-                script {
-                    version = sh(returnStdout: true,
-                    script: 'mvn help:evaluate -Dexpression=project.version -q -DforceStdout')
-                }
-                script {
-                    if (env.BRANCH_NAME == master) {
-                        envType = prd
-                        image = "${imageBaseName}:${version}"
-                    }
-                    else  {
-                        envType = 'dev'
-                        image = "${imageBaseName}:${version}-${envType}-${env.BUILD_ID}"
-                    }
-                }
-                echo "Building for ${envType} environment"
-                echo 'project version: ' + version
-                echo 'image name: ' + image
+                startPipeline()
             }
         }
         stage('Test') {
@@ -57,44 +34,77 @@ pipeline {
                 }
             }
         }
-        stage('Docker Push') {
+        stage('Docker Login') {
             steps {
                 script {
                     echo "${env.DOCKER_TOKEN} | docker login -u ${env.DOCKER_USER} --password-stdin"
-                    sh "docker push ${image}"
                 }
-                when {
-                    branch master
-                }
-                steps {
-                    sh "docker tag ${image} ${imageBaseName}:latest"
-                    sh "docker push ${imageBaseName}:latest"
-                    sh "docker rmi ${imageBaseName}:latest -f"
-                }
-                sh "docker rmi ${image}"
             }
         }
-        // stage('Deploy Image') {
-        //     steps {
-        //         script {
-        //             sh "docker push ${image}"
-        //         }
-        //     }
-        // }
-        // stage('Tag Latest') {
-        //     when {
-        //         branch master
-        //     }
-        //     steps {
-        //         sh "docker tag ${image} ${imageBaseName}:latest"
-        //         sh "docker push ${imageBaseName}:latest"
-        //         sh "docker rmi ${imageBaseName}:latest -f"
-        //     }
-        // }
-        // stage('Remove Unused docker image') {
-        //     steps {
-        //         sh "docker rmi ${image}"
-        //     }
-        // }
+        stage('Deploy Image') {
+            steps {
+                script {
+                    // sh "docker push ${image}"
+                    pushImage(image)
+                }
+            }
+        }
+        stage('Tag Latest') {
+            when {
+                branch master
+            }
+            steps {
+                latestImage = "${imageBaseName}:latest"
+                sh "docker tag ${image} ${latestImage}"
+                pushImage(latestImage)
+                removeImage(latestImage)
+                // sh "docker tag ${image} ${imageBaseName}:latest"
+                // sh "docker push ${imageBaseName}:latest"
+                // sh "docker rmi ${imageBaseName}:latest -f"
+
+            }
+        }
+        stage('Remove Unused docker image') {
+            steps {
+                // sh "docker rmi ${image}"
+                removeImage(image)
+            }
+        }
     }
+}
+
+def pushImage(imageName) {
+    sh "docker push ${imageName}"
+}
+
+def removeImage(imageName) {
+    sh "docker rmi ${imageName}"
+}
+
+def startPipeline() {
+    echo 'Checking Branch Build: ' + env.BRANCH_NAME
+    checkout scm
+    script {
+        committer = sh(returnStdout: true, script: 'git show -s --pretty=%an').trim()
+    }
+    echo 'committer -> ' + committer
+
+    script {
+        version = sh(returnStdout: true,
+        script: 'mvn help:evaluate -Dexpression=project.version -q -DforceStdout')
+    }
+    script {
+        if (env.BRANCH_NAME == master) {
+            envType = prd
+            image = "${imageBaseName}:${version}"
+        }
+        else {
+            envType = 'dev'
+            image = "${imageBaseName}:${version}-${envType}-${env.BUILD_ID}"
+        }
+    }
+    echo "Building for ${envType} environment"
+    echo 'project version: ' + version
+    echo 'image name: ' + image
+
 }
