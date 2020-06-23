@@ -64,20 +64,13 @@ pipeline {
                 }
             }
         }
-        // stage('Deploy Image') {
-        //     steps {
-        //         script {
-        //             // sh "docker push ${image}"
-        //             pushImage(image)
-        //         }
-        //     }
-        // }
-        stage('Deploy') {
+        stage('Push Images') {
             parallel {
-                stage('Push image') {
+                stage('Push Current Image') {
                     steps {
                         script {
                             pushImage(image)
+                            removeImage(image)
                         }
                     }
                 }
@@ -94,29 +87,6 @@ pipeline {
                         }
                     }
                 }
-            }
-        }
-        // stage('Tag Latest') {
-        //     when {
-        //         branch master
-        //     }
-        //     steps {
-        //         script {
-        //             String latestImage = "${imageBaseName}:latest"
-        //             sh "docker tag ${image} ${latestImage}"
-        //             pushImage(latestImage)
-        //             removeImage(latestImage)
-        //         }
-        //         // sh "docker tag ${image} ${imageBaseName}:latest"
-        //         // sh "docker push ${imageBaseName}:latest"
-        //         // sh "docker rmi ${imageBaseName}:latest -f"
-
-        //     }
-        // }
-        stage('Remove Docker Image') {
-            steps {
-                // sh "docker rmi ${image}"
-                removeImage(image)
             }
         }
     }
