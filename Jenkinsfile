@@ -42,7 +42,7 @@ pipeline {
             steps {
                 echo 'run sonarQube in future'
             }
-                }
+        }
         stage('Fomat Image Name') {
             steps {
                 script {
@@ -50,16 +50,20 @@ pipeline {
                     script: 'mvn help:evaluate -Dexpression=project.version -q -DforceStdout')
                 }
                 echo 'project version: ' + version
-                if (envType == prd) {
-                    image = "allanweber/miro-widgets:${version}"
-                } else {
-                    image = "allanweber/miro-widgets-${envType}:${version}"
+                script {
+                    if (envType == prd) {
+                        image = "allanweber/miro-widgets:${version}"
+                    } else {
+                        image = "allanweber/miro-widgets-${envType}:${version}"
+                    }
                 }
                 echo 'image name: ' + image
             }
         }
         stage('Build Image') {
-            sh "docker build -t ${image} ."
+            steps {
+                sh "docker build -t ${image} ."
+            }
         }
     }
 }
