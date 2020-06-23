@@ -1,4 +1,5 @@
-def committer, envType, version
+String committer, envType, version, image
+String prd = 'prd'
 pipeline {
     agent any
 
@@ -6,7 +7,7 @@ pipeline {
         stage ('Evaluating Environment') {
             steps {
                 script {
-                    if (env.BRANCH_NAME == 'master') envType = 'prd'
+                    if (env.BRANCH_NAME == 'master') envType = prd
                     else  envType = 'dev'
                 }
                 echo "Building for ${envType} environment"
@@ -42,18 +43,24 @@ pipeline {
                 echo 'run sonarQube in future'
             }
                 }
-        stage('Get Project Version') {
+        stage('Fomat Image Name') {
             steps {
                 script {
-                    version = sh(returnStdout: true, script: 'mvn help:evaluate -Dexpression=project.version -q -DforceStdout')
+                    version = sh(returnStdout: true,
+                    script: 'mvn help:evaluate -Dexpression=project.version -q -DforceStdout')
                 }
                 echo 'project version: ' + version
+                if (envType == prd) {
+                    image = allanweber/miro-widgets:${version}
+                } else {
+                    image = allanweber/miro-widgets-${envType}:${version}
+                }
+                echo 'image name: ' + image
             }
         }
         stage('Build Image') {
-            steps {
-                sh "docker build -t allanweber/miro-widgets:${version} ."
-            }
+            sh "docker build -t ${image} ."
+        }
         }
     }
 }
