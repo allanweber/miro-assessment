@@ -75,8 +75,10 @@ pipeline {
         stage('Deploy') {
             parallel {
                 stage('Push image') {
-                    script {
-                        pushImage(image)
+                    steps {
+                        script {
+                            pushImage(image)
+                        }
                     }
                 }
                 stage ('Push Latest Image') {
