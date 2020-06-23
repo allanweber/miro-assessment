@@ -1,4 +1,4 @@
-FROM adoptopenjdk/openjdk11
+FROM adoptopenjdk/openjdk11:alpine-jre
 
 EXPOSE 8080
 
@@ -8,6 +8,7 @@ ENV ENV_PROFILE=$ENV_ARG
 
 ENV JAVA_OPTS  "\
     -XX:+UnlockExperimentalVMOptions \
+    -Xmx512M \
     -Dspring.profiles.active=\${ENV_PROFILE}"
 
 ADD target/miro-widgets*.jar miro-widgets.jar
