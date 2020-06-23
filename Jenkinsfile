@@ -92,7 +92,7 @@ pipeline {
             steps {
                 script {
                     // sh "docker login -u ${env.DOCKER_USER} -p ${env.DOCKER_PASSWORD}"
-                    sh "${env.DOCKER_TOKEN} | docker login -u ${env.DOCKER_USER} --password-stdin"
+                    echo "${env.DOCKER_TOKEN} | docker login -u ${env.DOCKER_USER} --password-stdin"
                 }
             }
         }
