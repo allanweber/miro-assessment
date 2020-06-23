@@ -54,7 +54,7 @@ pipeline {
                 branch master
             }
             steps {
-                latestImage = "${imageBaseName}:latest"
+                String latestImage = "${imageBaseName}:latest"
                 sh "docker tag ${image} ${latestImage}"
                 pushImage(latestImage)
                 removeImage(latestImage)
