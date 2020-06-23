@@ -1,5 +1,6 @@
 String committer, envType, version, image
 String prd = 'prd'
+String master = 'master'
 pipeline {
     agent any
 
@@ -7,7 +8,7 @@ pipeline {
         stage ('Evaluating Environment') {
             steps {
                 script {
-                    if (env.BRANCH_NAME == 'master') envType = prd
+                    if (env.BRANCH_NAME == master) envType = prd
                     else  envType = 'dev'
                 }
                 echo "Building for ${envType} environment"
@@ -36,7 +37,7 @@ pipeline {
         stage('Sonar') {
             when {
                 not {
-                    branch 'master'
+                    branch master
                 }
             }
             steps {
@@ -51,11 +52,8 @@ pipeline {
                 }
                 echo 'project version: ' + version
                 script {
-                    if (envType == prd) {
-                        image = "allanweber/miro-widgets:${version}"
-                    } else {
-                        image = "allanweber/miro-widgets-${envType}:${version}"
-                    }
+                    if (envType == prd) image = "allanweber/miro-widgets:${version}"
+                    else image = "allanweber/miro-widgets-${envType}:${version}"
                 }
                 echo 'image name: ' + image
             }
