@@ -1,4 +1,4 @@
-String  committer, envType, version, image, latestImage
+String  committer, envType, version, image
 String imageBaseName = 'allanweber/miro-widgets'
 String prd = 'prd'
 String master = 'master'
@@ -54,10 +54,12 @@ pipeline {
                 branch master
             }
             steps {
-                latestImage = "${imageBaseName}:latest"
-                sh "docker tag ${image} ${latestImage}"
-                pushImage(latestImage)
-                removeImage(latestImage)
+                script {
+                    String latestImage = "${imageBaseName}:latest"
+                    sh "docker tag ${image} ${latestImage}"
+                    pushImage(latestImage)
+                    removeImage(latestImage)
+                }
                 // sh "docker tag ${image} ${imageBaseName}:latest"
                 // sh "docker push ${imageBaseName}:latest"
                 // sh "docker rmi ${imageBaseName}:latest -f"
