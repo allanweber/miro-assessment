@@ -51,9 +51,9 @@ pipeline {
                 }
                 echo 'project version: ' + version
                 if (envType == prd) {
-                    image = allanweber/miro-widgets:${version}
+                    image = "allanweber/miro-widgets:${version}"
                 } else {
-                    image = allanweber/miro-widgets-${envType}:${version}
+                    image = "allanweber/miro-widgets-${envType}:${version}"
                 }
                 echo 'image name: ' + image
             }
