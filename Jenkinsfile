@@ -1,7 +1,3 @@
-libraries {
-  lib('javaDockerPipeline')
-}
-
-javaDockerPipeline {
-    imageBaseName = 'allanweber/miro-widgets'
-}
+javaDockerPipeline (
+    imageBaseName: 'allanweber/miro-widgets'
+)
