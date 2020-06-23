@@ -1,9 +1,9 @@
 String  committer, envType, version, image
+String imageBaseName = 'allanweber/miro-widgets'
 String prd = 'prd'
 String master = 'master'
-String registryCredential = 'DockerHub'
-def dockerImage = ''
-
+// String registryCredential = 'DockerHub'
+// def dockerImage = ''
 pipeline {
     agent any
 
@@ -55,8 +55,8 @@ pipeline {
                 }
                 echo 'project version: ' + version
                 script {
-                    if (envType == prd) image = "allanweber/miro-widgets:${version}"
-                    else image = "allanweber/miro-widgets-${envType}:${version}-${env.BUILD_ID}"
+                    if (envType == prd) image = "${imageBaseName}:${version}"
+                    else image = "${imageBaseName}:${version}-${envType}-${env.BUILD_ID}"
                 }
                 echo 'image name: ' + image
             }
@@ -64,17 +64,37 @@ pipeline {
         stage('Build Image') {
             steps {
                 script {
-                    dockerImage = docker.build image
+                    sh "docker build --build-arg ENV_ARG=${envType} -t ${image} ."
+                }
+            }
+        }
+        stage('Docker Login') {
+            steps {
+                script {
+                    sh "docker login -u ${env.DOCKER_USER} -p ${env.DOCKER_PASSWORD}"
                 }
             }
         }
         stage('Deploy Image') {
             steps {
                 script {
-                    docker.withRegistry( '', registryCredential ) {
-                        dockerImage.push()
-                    }
+                    sh "docker push ${image}"
                 }
+            }
+        }
+        stage('Tag Latest') {
+            when {
+                branch master
+            }
+            steps{
+                sh "docker tag ${image} ${imageBaseName}:latest"
+                sh "docker push ${imageBaseName}:latest"
+                sh "docker rmi ${imageBaseName}:latest -f"
+            }
+        }
+        stage('Remove Unused docker image') {
+            steps{
+                sh "docker rmi ${image}"
             }
         }
     }
