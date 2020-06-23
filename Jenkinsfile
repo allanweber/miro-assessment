@@ -40,7 +40,7 @@ pipeline {
             }
             steps {
                 echo 'run sonarQube in future'
-            }..
+            }
                 }
         stage('Get Project Version') {
             steps {
