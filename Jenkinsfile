@@ -1,7 +1,5 @@
 String  committer, envType, version, image
 String imageBaseName = 'allanweber/miro-widgets'
-String prd = 'prd'
-String master = 'master'
 pipeline {
     agent any
 
@@ -20,7 +18,7 @@ pipeline {
         stage('Sonar') {
             when {
                 not {
-                    branch master
+                    branch 'master'
                 }
             }
             steps {
@@ -51,7 +49,7 @@ pipeline {
         }
         stage('Tag Latest') {
             when {
-                branch master
+                branch 'master'
             }
             steps {
                 script {
@@ -96,8 +94,8 @@ def startPipeline() {
         script: 'mvn help:evaluate -Dexpression=project.version -q -DforceStdout')
     }
     script {
-        if (env.BRANCH_NAME == master) {
-            envType = prd
+        if (env.BRANCH_NAME == 'master') {
+            envType = 'prd'
             image = "${imageBaseName}:${version}"
         }
         else {
