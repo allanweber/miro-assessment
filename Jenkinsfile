@@ -1,10 +1,10 @@
-pipeline {
+String  committer, envType, version, image
+String prd = 'prd'
+String master = 'master'
+String registryCredential = 'DockerHub'
+def dockerImage = ''
 
-    String  committer, envType, version, image
-    String prd = 'prd'
-    String master = 'master'
-    String registryCredential = 'DockerHub'
-    def dockerImage = ''
+pipeline {
     agent any
 
     stages {
