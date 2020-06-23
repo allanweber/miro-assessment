@@ -72,23 +72,24 @@ pipeline {
         //         }
         //     }
         // }
-        stage('Deploy Parallel') {
-            parallel deploy: {
-                steps {
+        stage('Deploy') {
+            parallel {
+                stage('Push image') {
                     script {
                         pushImage(image)
                     }
                 }
-            } deployMaster: {
-                when {
-                    branch master
-                }
-                steps {
-                    script {
-                        String latestImage = "${imageBaseName}:latest"
-                        sh "docker tag ${image} ${latestImage}"
-                        pushImage(latestImage)
-                        removeImage(latestImage)
+                stage ('Push Latest Image') {
+                    when {
+                        branch master
+                    }
+                    steps {
+                        script {
+                            String latestImage = "${imageBaseName}:latest"
+                            sh "docker tag ${image} ${latestImage}"
+                            pushImage(latestImage)
+                            removeImage(latestImage)
+                        }
                     }
                 }
             }
