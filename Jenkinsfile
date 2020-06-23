@@ -63,14 +63,13 @@ pipeline {
         }
         stage('Build Image') {
             steps {
-                sh "docker build -t ${image} ."
-            }
-            script {
-                dockerImage = docker.build image
+                script {
+                    dockerImage = docker.build image
+                }
             }
         }
         stage('Deploy Image') {
-            steps{
+            steps {
                 script {
                     docker.withRegistry( '', registryCredential ) {
                         dockerImage.push()
