@@ -1,11 +1,10 @@
 pipeline {
-    environment {
-        committer, envType, version, image
-        prd = 'prd'
-        master = 'master'
-        registryCredential = 'DockerHub'
-        dockerImage = ''
-    }
+
+    String  committer, envType, version, image
+    String prd = 'prd'
+    String master = 'master'
+    String registryCredential = 'DockerHub'
+    def dockerImage = ''
     agent any
 
     stages {
