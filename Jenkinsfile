@@ -1,4 +1,4 @@
 javaDockerPipeline (
-    imageBaseName: 'allanweber/miro-widgets'
+    imageBaseName: 'allanweber/miro-widgets',
     runSonar: true
 )
